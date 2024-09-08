@@ -10,6 +10,7 @@ from scipy.io.wavfile import write
 from scipy.signal import detrend 
 import matplotlib.pyplot as plt
 import copy
+import pandas as pd
 
 N = 10001
 time = np.linspace(0, 4 * np.pi, N)
@@ -146,4 +147,49 @@ for si in range(4):
     ax[kj, si].set_title(r'k=%g, $\sigma$=%.2f' % (krange[kidx[kj]], srange[sidx[si]]))
     ax[kj, si].set_aspect(1/ax[kj, si].get_data_ratio())
 
+plt.show()
+
+# Método No. 3: Median Filter
+
+pnts = 1234
+signal = np.mod( np.linspace(0, 5, pnts)**2, 5)
+p = int(0.1 * len(signal))
+spiketimes = np.random.randint(0, pnts, p)
+
+signal[spiketimes] = 10 + np.random.rand(p) * 100 
+
+plt.plot(signal)
+plt.show()
+
+# Realizar el filtro mean del método 1
+
+k = 15
+for i in range(pnts):
+    signal[i] = np.mean( signal[np.max((0, i-k)) : np.min((pnts, i+k))] )
+
+plt.plot(signal)
+plt.show()
+
+plt.hist(signal, 80)
+plt.ylim([0, 10])
+plt.xlabel('Data value')
+plt.ylabel('Count')
+plt.title('Distribution of data values')
+plt.show()
+
+threshold = 10
+suprathresolhidx = np.where ( signal > threshold )[0]
+
+plt.plot(signal)
+plt.plot(suprathresolhidx, signal[suprathresolhidx], 'ro')
+plt.xlim([200,400])
+plt.show()
+
+k = 7
+for i in suprathresolhidx:
+    lowbound = np.max( (0, i-k) )
+    uppbound = np.min( (pnts, i+k) )
+    signal[i] = np.median(signal[lowbound : uppbound])
+
+plt.plot(signal)
 plt.show()
